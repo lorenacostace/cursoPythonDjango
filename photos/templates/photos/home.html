@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block section %}
+    <h1>Bienvenido a Frikr</h1>
+    <p>Frikr es como Flickr, pero en friki </p>
+
+    {% if photos_list|length > 0 %}
+        <h2>Últimas fotos publicadas</h2>
+        {% include 'photos/photos_loop.html' %}
+    {% else %}
+        ¡Sé el primero en publicar una foto!
+    {% endif %}
+{% endblock %}
