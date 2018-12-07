@@ -1,8 +1,12 @@
+{% load staticfiles %}
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>{% block tittle %} Bienvenido a Frikr - Como Flickr, pero en friki {% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap-theme.min.css' %}">
 </head>
 <body>
     <nav>
@@ -10,7 +14,7 @@
 
         <a href="{% url 'photos_list' %}">Listado de fotos</a>
         {% if user.is_authenticated %}
-            <a href="{% url 'create_photo' %}">Mis fotos</a>
+            <a href="{% url 'user_photos' %}">Mis fotos</a>
 
             <a href="{% url 'create_photo' %}">Crear foto</a>
 
