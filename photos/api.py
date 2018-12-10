@@ -23,6 +23,11 @@ class PhotoListAPI(PhotosQueryset, ListCreateAPIView):
     def get_queryset(self):
         return self.get_photos_queryset(self.request)
 
+    # Sobreescribimos el metodo para que antes de guardar la foto, coja el usuario autenticado y se lo asigne al
+    # propietario de la foto
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
     """
     def get(self, request):
