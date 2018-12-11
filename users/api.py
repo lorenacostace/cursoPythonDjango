@@ -6,12 +6,19 @@ from users.serializers import UserSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import status  # nos proporciona los codigos HTTP con nombres.
 from rest_framework.pagination import PageNumberPagination
+from users.permissions import UserPermission
 
 
 # Endpoint del listado
 class UserListAPI(APIView):
 
+    # Le decimos cuales son las clases de permisos
+    permission_classes = (UserPermission,)
+
     def get(self, request):
+        # Ejecutamos el metodo para ver si el usuario tiene permisos para ejecutar esta accion
+        self.check_permissions(request)
+
         # Instancio el paginador
         paginator = PageNumberPagination()
 
@@ -28,21 +35,12 @@ class UserListAPI(APIView):
         # Guardamos los datos serializados
         serialized_users = serializer.data  # Lista de diccionarios
 
-        """
-        Convertimos los datos serializados a JSON. Primero los instanciamos, y despues le decimos que nos renderice los 
-        usuarios serializados.
-        """
-        """
-        renderer = JSONRenderer()
-        json_users = renderer.render(serialized_users)
-        
-        return HttpResponse(json_users)
-        """
-
         # Devolvemos la respuesta paginada
         return paginator.get_paginated_response(serialized_users)
 
     def post(self, request):
+        self.check_permissions(request)
+
         # Le pasamos un diccionario de datos, no una instancia
         serializer = UserSerializer(data=request.data)
 
@@ -60,9 +58,16 @@ class UserListAPI(APIView):
 # Definimos el endpoint de detalle
 class UserDetailAPI(APIView):
 
+    # Le decimos cuales son las clases de permisos
+    permission_classes = (UserPermission,)
+
     def get(self, request, pk):
+        self.check_permissions(request)
+
         #  Buscar el usuario, cuya pk me estan pasando
         user = get_object_or_404(User, pk=pk)
+
+        self.check_permissions(request, user)
 
         #Le pasamos el objeto User para que lo serialice, y lo convierta en un diccionario, que guardara en DATA
         serializer = UserSerializer(user)
@@ -70,8 +75,12 @@ class UserDetailAPI(APIView):
         return Response(serializer.data)
 
     def put(self, request, pk):
+        self.check_permissions(request)
+
         # Debemos comprobar el sl usuario que se desea actualizar existe
         user = get_object_or_404(User, pk=pk)
+
+        self.check_permissions(request, user)
 
         # Serializame este usuario(instance=user) con estos datos(data=request.data)
         serializer = UserSerializer(instance=user, data=request.data)
@@ -84,8 +93,12 @@ class UserDetailAPI(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
+        self.check_permissions(request)
+
         # Debemos comprobar el sl usuario que se desea actualizar existe
         user = get_object_or_404(User, pk=pk)
+
+        self.check_permissions(request, user)
 
         # Borramos el usuario
         user.delete()
