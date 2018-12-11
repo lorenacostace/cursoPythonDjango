@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 from django.contrib.auth.models import User
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from users.serializers import UserSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import status  # nos proporciona los codigos HTTP con nombres.
 from rest_framework.pagination import PageNumberPagination
 from users.permissions import UserPermission
+from rest_framework.viewsets import ViewSet
 
 
-# Endpoint del listado
-class UserListAPI(APIView):
+class UserViewSet(ViewSet):
 
     # Le decimos cuales son las clases de permisos
     permission_classes = (UserPermission,)
 
-    def get(self, request):
+    def list(self, request):
         # Ejecutamos el metodo para ver si el usuario tiene permisos para ejecutar esta accion
         self.check_permissions(request)
 
@@ -38,7 +37,7 @@ class UserListAPI(APIView):
         # Devolvemos la respuesta paginada
         return paginator.get_paginated_response(serialized_users)
 
-    def post(self, request):
+    def create(self, request):
         self.check_permissions(request)
 
         # Le pasamos un diccionario de datos, no una instancia
@@ -54,14 +53,7 @@ class UserListAPI(APIView):
             # Devolvemos el error
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-# Definimos el endpoint de detalle
-class UserDetailAPI(APIView):
-
-    # Le decimos cuales son las clases de permisos
-    permission_classes = (UserPermission,)
-
-    def get(self, request, pk):
+    def retrieve(self, request, pk):
         self.check_permissions(request)
 
         #  Buscar el usuario, cuya pk me estan pasando
@@ -74,7 +66,7 @@ class UserDetailAPI(APIView):
 
         return Response(serializer.data)
 
-    def put(self, request, pk):
+    def update(self, request, pk):
         self.check_permissions(request)
 
         # Debemos comprobar el sl usuario que se desea actualizar existe
@@ -92,7 +84,7 @@ class UserDetailAPI(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk):
+    def destroy(self, request, pk):
         self.check_permissions(request)
 
         # Debemos comprobar el sl usuario que se desea actualizar existe
