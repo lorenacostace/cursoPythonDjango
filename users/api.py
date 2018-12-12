@@ -10,6 +10,9 @@ from rest_framework.viewsets import GenericViewSet
 
 
 class UserViewSet(GenericViewSet):
+    queryset = User.objects.all()
+
+    serializer_class = UserSerializer
 
     # Le decimos cuales son las clases de permisos
     permission_classes = (UserPermission,)
@@ -17,15 +20,19 @@ class UserViewSet(GenericViewSet):
     pagination_classes = PageNumberPagination
 
     def list(self, request):
+
         # Obtengo todos los usuarios
-        users = User.objects.all()
+        #users = User.objects.all()
+
+        # MIO
+        queryset = self.get_queryset()
 
         # Paginar el queryset
-        self.paginate_queryset(users)
+        self.paginate_queryset(queryset)
 
         # Al serializer le paso lo que quiero serializar. El many=True es para decirle que tiene que serializar mas de
         # un objeto, ya que por defecto, el serializer serializa un objeto.
-        serializer = UserSerializer(users, many=True)
+        serializer = UserSerializer(queryset, many=True)
 
         # Devolvemos la respuesta paginada
         return self.get_paginated_response(serializer.data)
