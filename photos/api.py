@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.viewsets import ModelViewSet
 from photos.models import Photo
 from photos.serializers import PhotoSerializer, PhotoListSerializer
@@ -13,15 +14,24 @@ class PhotosViewSet(PhotosQueryset, ModelViewSet):
     # Para autenticacion
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
+    # Le decimos cuales son los backends de filtrado. SearcFilter para búsqueda, y OrderingFilter para filtrado.
+    filter_backends = (SearchFilter, OrderingFilter)
+
+    # Campos de búsqueda
+    search_fields = ('name', 'description', 'owner__first_name')
+
+    # Ordenamos por nombre y propietario
+    ordering_fields = ('name', 'owner')
+
     def get_queryset(self):
         """
-        Para definir dinamicamente que devolver segun el usuario
+        Para definir dinámicamente que devolver segun el usuario
         """
         return self.get_photos_queryset(self.request)
 
     def get_serializer_class(self):
         """
-        En funcion del tipo de get que sea (para listar o de detalle) devolvemos un Serializer u otro
+        En función del tipo de get que sea (para listar o de detalle) devolvemos un Serializer u otro
         """
         if self.action == 'list':
             return PhotoListSerializer
@@ -30,7 +40,7 @@ class PhotosViewSet(PhotosQueryset, ModelViewSet):
 
     def perform_create(self, serializer):
         """
-        Sobreescribimos el metodo para que antes de guardar la foto, coja el usuario autenticado y se lo asigne al
+        Sobreescribimos el método para que antes de guardar la foto, coja el usuario autenticado y se lo asigne al
         propietario de la foto
         """
         serializer.save(owner=self.request.user)
